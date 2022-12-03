@@ -49,7 +49,9 @@ beacon_data[27] = 0x60;
 beacon_data[28] = 0x57;
 
   oAdvertisementData.setManufacturerData(std::string(beacon_data, 29));
-  pAdvertising->setScanResponseData(oAdvertisementData);
+  pAdvertising->setAdvertisementData(oAdvertisementData);
+  //pAdvertising->setScanResponseData(oAdvertisementData);
+   pAdvertising->setScanResponse(false);
   //pAdvertising->setAdvertisementType(ADV_TYPE_NONCONN_IND);
 }
 
@@ -78,5 +80,5 @@ void loop(){
   delay(1000);
   pAdvertising->stop();
    Serial.println("Advertizing stopped…");
-  delay(1000);
+  delay(5000);
 }
