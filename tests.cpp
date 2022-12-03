@@ -13,7 +13,6 @@ struct timeval now;
 
 void setBeacon() {
   char beacon_data[29];
-  uint16_t beconUUID = 0x1EFF;
   uint32_t tmil = now.tv_sec*10;
   BLEAdvertisementData oAdvertisementData = BLEAdvertisementData();
   //oAdvertisementData.setFlags(0x06); // GENERAL_DISC_MODE 0x02 | BR_EDR_NOT_SUPPORTED 0x04

@@ -44,7 +44,7 @@ I've used Wireshark and an nrf5240UA Dongle to scan the packets the remote sends
 
 After grabbing data from 3 different remotes:
 
-- First Byte: "Type" is 0xFF
+- First Byte: "Type" is 0xFF -> Turns out this isn't actually needed, first two bytes will always be 0x1EFF
 - Following bytes: 0x5655
 - The next bytes are as follows:
   - 11 bytes of static data: 188752b65f2b5e00fc3151 -> Same for every remote
@@ -72,4 +72,14 @@ After grabbing data from 3 different remotes:
   - 6 Bytes: -> Possibly some checksum or just random data. Completely different on each button press
   - 2 Bytes: -> Always 0x6057
 
+
+# ESP32
+
+I'm working on an implementation for ESP32. Ideally I'll be able to integrate it directly with Home Assistant through ESPHome Custom Component.
+Currently, the proof of concept is succesful: I can turn off one of the lights by cloning the advertisement data from an already paired remote.
+
+
+References:
 https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/BLEAdvertising.cpp
+
+https://gitter.im/espressif/arduino-esp32?at=5f2c519f107f3a0efab25f42 -> Many thanks to chegewara and RW, their examples were essential to getting this project working.
