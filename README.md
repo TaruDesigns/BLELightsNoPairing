@@ -34,30 +34,13 @@ Note that when I say *powered on* I mean when the power switch (the switch on th
 
 # Discoveries
 
-I've used [nRF Connect](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp&hl=en) to scan the packets the remote sends.
-- Worthy of note, multiple devices can be "paired" with the lights. I've succesfully done the pairing method with the original remote, my phone using the Lamp Smart App, and the same phone simply redoing the "Pairing" packet previously captured by nRF. The lights don't seem to "forget" the previous devices, and I can control them with either the remote or my phone.
+I've used Wireshark and an nrf5240UA Dongle to scan the packets the remote sends.
+
 - Rather than having the lights be in discoverable mode, it seems that the lights are simply scanning for certain advertising packets at all times. I have tried to reverse engineer the packets sent by one of the remotes:
-- First byte "Type" is always 0xFF
-- Next 2 bytes are the "address". In my remotes it seems it's always "5655"
-- The rest is custom data, examples:
-  "MODE" Button
-5655188752b65f2b5e00fc31515c729cf724cbd7fee331a24757716057 - Cool White Full
-5655188752b65f2b5e00fc31515c729cf7dbcb73fe4d9f65e901896057 - Neutral White Full
-5655188752b65f2b5e00fc31515c729c08dbcbf3fe4b9982ef89c96057 - Candlelight Full
-"OFF" button
-5655188752b65f2b5e00fc315150729c0824cb67fcce1c536ad0666057
-"ON" Button
-5655188752b65f2b5e00fc3151d0729c0824cb87fcc3114c678dd96057
-"Full Power" Button
-5655188752b65f2b5e00fc31515c729cf7dbcb47bc11c302b5f6fd6057
-"half power" BUtton
-5655188752b65f2b5e00fc31515c729cf6dacbc77cbe6c121adc9b6057
-"Night power" Button
-5655188752b65f2b5e00fc31511c729c0824cb79fca775c503c7756057
+- It seems only two remotes can be "paired" with the light. Trying to add a third one makes the lights "forget" the previous one (but can easily be re-paired again). I'm using "pairing" lightly here, as I suspect it's not actual pairing but simply the lights storing some unique ID related to each remote.
 
-Using NRFConnect, I can set up the dongle as advertiser, 50ms advertising interval, and the packets will make the lights react accordingly.
+- Using NRFConnect, I can set up the dongle as advertiser, 50ms advertising interval, and the packets will make the lights react accordingly.
 - For the "mode" button in the remote, the remote itself is the one doing the "cycling", each mode has a distinct code associated with it.
-
 
 After grabbing data from 3 different remotes:
 
@@ -71,8 +54,22 @@ After grabbing data from 3 different remotes:
     - 0x5C for "Change Mode" -> It seems that "FullBrightness" and "Half Brightness" are both in the same class as "Mode cycle" (Middle button)
     - 0x1C for "Night mode" -> This button goes to minimum brightness and colour temperature
   - 2 Bytes: -> Possibly a "unique address" for each remote
+    - 0x3F94, 0x729C or 0xF097. Possibly random, these are the ones I have
   - 3 Bytes: -> Related to each specific function
-  - 1 Byte: -> Possibly some checksum or just random data. Completely different on each button press
+    - FULLPOWER: Always 0xF7DBCB
+    - HALFPOWER: Always 0xF6DACB
+    - MODES:
+      - 0x08DBCB
+      - 0xF724CB
+      - 0xF7DBCB
+    - NIGHTMODE, ON and OFF: Always 0x0824CB 
+  - 1 Byte: -> Possibly some checksum or just random data. Completely different on each button press -> Seems like lower nibble is more or less constant for each function
   - 1 Byte: -> Related to each specific function
+    - FULLPOWER: Always 0xBC
+    - HALFPOWER: Always 0x7C
+    - MODES: Always 0xFE
+    - NIGHTMODE, ON and OFF: Always 0xFC
   - 6 Bytes: -> Possibly some checksum or just random data. Completely different on each button press
   - 2 Bytes: -> Always 0x6057
+
+https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/BLEAdvertising.cpp
