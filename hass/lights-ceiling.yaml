@@ -1,0 +1,44 @@
+esphome:
+  name: lights-ceiling
+  includes:
+    - blelights.h  
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+
+
+light:
+- platform: custom
+  lambda: |-
+    auto light_out = new BLELights();
+    App.register_component(light_out);
+    return {light_out};
+
+  lights:
+    - name: "My Custom Light"
+      default_transition_length: 0s
+# Enable logging
+logger:
+  
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "REPLACE"
+
+ota:
+  password: "REPLACE""
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Lights-Ceiling Fallback Hotspot"
+    password: "REPLACE"
+
+captive_portal:
+    

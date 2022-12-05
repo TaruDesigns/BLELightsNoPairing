@@ -636,7 +636,7 @@ void loop(){
 
   // Turn FullPower
   Serial.println("Turn FullPower...");
-  FullPower_BedRoom(beacon_data);
+  FullPower_LabRoom(beacon_data);
   delay(4500);  
     
 
