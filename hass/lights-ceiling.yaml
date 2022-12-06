@@ -2,6 +2,9 @@ esphome:
   name: lights-ceiling
   includes:
     - blelights.h  
+    #- blecodes.h # -> With each change of this file it needs to be included and then "removed" from the YAML. There must be a better way.
+  libraries:
+    - nkolban/ESP32 BLE Arduino@^1.0.1
 
 esp32:
   board: esp32dev
@@ -29,7 +32,7 @@ api:
     key: "REPLACE"
 
 ota:
-  password: "REPLACE""
+  password: "REPLACE"
 
 wifi:
   ssid: !secret wifi_ssid
