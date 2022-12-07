@@ -7,9 +7,8 @@
 const float maxMired = 500;
 const float minMired = 153;
 
-float color_temperature_ = -1.0f; // Variable to store previous value. There should be a better way to do this
-float bright_ = -1.0f;  // Variable to store previous value  
-bool onoffstatus_ = false;
+
+
 
 #define COLOR_COOL 0.35 // Values below this are mapped to "Cool white"
 #define COLOR_WARM 0.70 // Value above this is mapped to "Warm white"
@@ -18,11 +17,20 @@ bool onoffstatus_ = false;
 #define BRIGHTNESS_HALF 0.35
 
 #define DATALEN 29 // Length of array "beacon data". Note: The full data is actually 30 bytes but one of them is set by default
-#define ADVERT_TIME 500 // Time the "advert" beacon will be on (milliseconds)
+#define ADVERT_TIME 250 // Time the "advert" beacon will be on (milliseconds)
+#define WAIT_TIME 50 // Time to wait after "stop" advertising -> Useful to handle queued commands
+
+// LIGHT NAMES
+// LABROOM
+// LIVROOM
+// BEDROOM
+
 // BLE RELATED STUFF
 
 char beacon_data[DATALEN];
 BLEAdvertising *pAdvertising;
+
+
 
 // This should be included in BLECodes.h inside every "major" function
 // But I can't figure out how to make it so the compiler doesn't complain
@@ -36,72 +44,120 @@ void SendBLECommand(char beacon_data[]) {
     pAdvertising->start();
     delay(ADVERT_TIME); //Maybe there's a way to do this async so it doesn't block the entire component.
     pAdvertising->stop(); 
+    delay(WAIT_TIME);
 }
 
 
-void ColorHandler(float color_temperature){
+void ColorHandler(float color_temperature, std::string lightname){
   // Generic Handler for colour modes
       if(color_temperature <= COLOR_COOL){
         //Send "cool"
         ESP_LOGD("custom", "COOL White");
-        Cool_LabRoom(beacon_data);
-      } else if (color_temperature >= COLOR_WARM){
+        if(lightname == "LABROOM")
+            Cool_LabRoom(beacon_data);
+        else if(lightname == "LIVROOM")
+            Cool_LivRoom(beacon_data);
+        else if(lightname=="BEDROOM")
+            Cool_BedRoom(beacon_data);
+        }
+      else if (color_temperature >= COLOR_WARM){
         //Send "Warm white"
         ESP_LOGD("custom", "WARM White");
-        Warm_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            Warm_LabRoom(beacon_data);
+          else if(lightname == "LIVROOM")
+            Warm_LivRoom(beacon_data);
+          else if(lightname == "BEDROOM")
+            Warm_BedRoom(beacon_data);
       }
-        else{
+      else {
         //Send "Neutral white"
         ESP_LOGD("custom", "NEUTRAL White");
-        Neutral_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            Neutral_LabRoom(beacon_data);
+          else if(lightname == "LIVROOM")
+            Neutral_LivRoom(beacon_data);
+          else if(lightname == "BEDROOM")
+            Neutral_BedRoom(beacon_data);
       }   
       SendBLECommand(beacon_data);
 }
 
-void BrightnessHandler(float bright){
+void BrightnessHandler(float bright, std::string lightname){
   // Generic handler for "brightness" adjustment
       if(bright >= BRIGHTNESS_FULL){
         //Send "Full"
         ESP_LOGD("custom", "FULL Power");
-        FullPower_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            FullPower_LabRoom(beacon_data);
+          else  if(lightname == "LIVROOM")
+            FullPower_LivRoom(beacon_data);
+          else  if(lightname == "BEDROOM")
+            FullPower_BedRoom(beacon_data);
       } else if (bright >= BRIGHTNESS_HALF){
         //Send "Half power"
         ESP_LOGD("custom", "HALF Power");
-        HalfPower_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            HalfPower_LabRoom(beacon_data);
+          else  if(lightname == "LIVROOM")
+            HalfPower_LivRoom(beacon_data);
+          else  if(lightname == "BEDROOM")
+            HalfPower_BedRoom(beacon_data);
       }
         else{
-        //Send "NightMode" NOTE: Always send the color here as well, since "night mode" changes the color too
-        // This doesn't work, need to find better BLE codes
+        //Send "NightMode" NOTE: Night Mode also changes the color...
         ESP_LOGD("custom", "Night Mode");
-        ColorHandler(color_temperature_);
+          if(lightname == "LABROOM")
+            NightMode_LabRoom(beacon_data);
+          else  if(lightname == "LIVROOM")
+            NightMode_LivRoom(beacon_data);
+          else  if(lightname == "BEDROOM")
+            NightMode_BedRoom(beacon_data);
       }   
       SendBLECommand(beacon_data);
 }
 
-void ONOFFHandler(bool onoffstatus){
+void ONOFFHandler(bool onoffstatus, std::string lightname){
       if(onoffstatus){
         // Turn ON
         ESP_LOGD("custom", "TURN ON");
-        PowerON_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            PowerON_LabRoom(beacon_data);
+          else  if(lightname == "LIVROOM")
+            PowerON_LivRoom(beacon_data);
+          else  if(lightname == "BEDROOM")
+            PowerON_BedRoom(beacon_data);
       }
       else{
         // TURN OFF
         ESP_LOGD("custom", "TURN OFF");
-        PowerOFF_LabRoom(beacon_data);
+          if(lightname == "LABROOM")
+            PowerOFF_LabRoom(beacon_data);
+          else  if(lightname == "LIVROOM")
+            PowerOFF_LivRoom(beacon_data);
+          else  if(lightname == "BEDROOM")
+            PowerOFF_BedRoom(beacon_data);
       }
       SendBLECommand(beacon_data);
 }
-
 // For testing I will implement only one light for now
-class BLELights : public Component, public LightOutput {
+class BLELights : public Component, public LightOutput, public EntityBase {
  public:
+      std::string lightname;
+      float color_temperature_ = -1.0f; // Variable to store previous value. There should be a better way to do this
+      float bright_ = -1.0f;  // Variable to store previous value  
+      bool onoffstatus_ = false;
+       BLELights(std::string nametype){
+        lightname = nametype;
+
+      }
   void setup() override {
     // This will be called by App.setup()
       BLEDevice::init("ESP32");
   // Create the BLE Server
       BLEServer *pServer = BLEDevice::createServer();
       pAdvertising = pServer->getAdvertising();
-      //beaconData_Common(beacon_data);
+
 
   }
   LightTraits get_traits() override {
@@ -114,46 +170,42 @@ class BLELights : public Component, public LightOutput {
     return traits;
   }
 
-
-
   void write_state(LightState *state) override {
+
+    //CHECK NAME
+    //ESP_LOGD("custom", "Light Name: %s", this->lightname)
     // This will be called by the light to get a new state to be written.
-    float color_temperature, white_brightness;
+    float color_temperature, white_brightness; // Local variables to check whether or not we update the class values
     bool onoffstatus;
     // Get the state of these light color values. In range from 0.0 (off) to 1.0 (on)
     onoffstatus = state->current_values.is_on();
     // Turn it on/off if needed
-    if(onoffstatus_!= onoffstatus){
-      onoffstatus_ = onoffstatus;
-      ONOFFHandler(onoffstatus);
+    if(this->onoffstatus_!= onoffstatus){
+      this->onoffstatus_ = onoffstatus;
+      ONOFFHandler(onoffstatus, this->lightname);
     }
 
     // This will leave color temp and brightness as a float from 0 to 1
     state->current_values_as_ct(&color_temperature, &white_brightness); 
-    ESP_LOGD("custom", "Outputs:  ColorTemp %f", color_temperature);    
-    ESP_LOGD("custom", "Outputs:  Brightness %f", white_brightness);     
-
-    //------ This returns the color temp in mireds----
-    // float colorTemp;
-    //colorTemp = state->current_values.get_color_temperature();
-    //-------------------------------------------------
+    //ESP_LOGD("custom", "Outputs:  ColorTemp %f", color_temperature);    
+    //ESP_LOGD("custom", "Outputs:  Brightness %f", white_brightness);     
 
     //------ This returns the brightness mapped to 0-1 as the "slider" in HASS----
     float bright;
     bright = state->current_values.get_brightness();
     //-------------------------------------------------
-    ESP_LOGD("custom", "Outputs:  BRIGHTNESS MAPPED %f", bright);  
+    //ESP_LOGD("custom", "Outputs:  BRIGHTNESS MAPPED %f", bright);  
     //--- Adjust Color Temperature ---
-    if(color_temperature_ != color_temperature ){
-      color_temperature_ = color_temperature;
+    if(this->color_temperature_ != color_temperature ){
+      this->color_temperature_ = color_temperature;
       // New value for color temperature, send the command
-      ColorHandler(color_temperature);
+      ColorHandler(color_temperature, this->lightname);
     }
     //--- Adjust Brightness -----
-    if(bright_ != bright){
-      bright_ = bright;
+    if(this->bright_ != bright){
+      this->bright_ = bright;
       // New value for color temperature, send the command
-      BrightnessHandler(bright);
+      BrightnessHandler(bright,this->lightname);
     }
   }
 };
