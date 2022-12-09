@@ -16,7 +16,7 @@ esp32:
 light:
 - platform: custom
   lambda: |-
-    auto light_lab = new BLELights("LABROM");
+    auto light_lab = new BLELights("LABROOM");
     App.register_component(light_lab);
     return {light_lab};
   lights:
