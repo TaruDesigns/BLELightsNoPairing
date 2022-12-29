@@ -19,6 +19,28 @@ void beaconData_Common(char beacon_data[]) {
 
 }
 
+
+void beaconData_Null(char beacon_data[]) {
+    //This is a function to "turn off" advert by setting random gibberish to the advertised data
+    // This shouldn't be needed once the stop() method works properly
+    beacon_data[0] = 0x00; // Begin starting sequence
+    beacon_data[1] = 0x00;
+    beacon_data[2] = 0x00;
+    beacon_data[3] = 0x00;
+    beacon_data[4] = 0x00;
+    beacon_data[5] = 0x00;
+    beacon_data[6] = 0x00;
+    beacon_data[7] = 0x00;
+    beacon_data[8] = 0x00;
+    beacon_data[9] = 0x00;
+    beacon_data[10] = 0x00;
+    beacon_data[11] = 0x00;
+    beacon_data[12] = 0x00; // End of "starting sequence"
+    beacon_data[27] = 0x00; // Trailing bytes
+    beacon_data[28] = 0x01; // Trailing bytes
+
+}
+
 //---- Addresses for each remote ----
 void beaconData_LabRoom(char beacon_data[]) {
     // TODO This is really dirty, need to change it to use an input argument instead
@@ -501,9 +523,4 @@ void FullPower_LivRoom(char beacon_data[]) {
     beacon_data[26] = 0xB7;
 
 
-}
-
-
-void testlog(){
-    ESP_LOGD("custom", "This is a Test Function");
 }

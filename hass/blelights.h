@@ -1,7 +1,5 @@
 #include "esphome.h"
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
+#include "NimBLEDevice.h"
 #include "blecodes.h"
 
 const float maxMired = 500;
@@ -99,8 +97,14 @@ class BLELights: public Component, public LightOutput, public EntityBase {
     delay(ADVERT_TIME); //Maybe there's a way to do this async so it doesn't block the entire component.
     this -> pAdvertising -> stop();
     delay(WAIT_TIME);
-    //BLEDevice::getAdvertising()->stop(); //Hardcode a "stop advertising" just in case    
+    BLEDevice::getAdvertising()->stop(); //Hardcode a "stop advertising" just in case    
     //BLEDevice::deinit(true);
+    //BLEDevice::init("ESP32"); 
+    // --- The "stop" method doesn't actually work so I just send gibberish data instead
+    //beaconData_Null(this -> beacon_data);
+    //oAdvertisementData.setManufacturerData(std::string(this -> beacon_data, DATALEN));
+    //this -> pAdvertising -> setAdvertisementData(oAdvertisementData);
+    //this -> pAdvertising -> start();
   }
   //--------Handler Methods---------------
   void ColorHandler() {

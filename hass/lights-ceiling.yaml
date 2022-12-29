@@ -4,7 +4,7 @@ esphome:
     - blelights.h  
     #- blecodes.h # -> With each change of this file it needs to be included and then "removed" from the YAML. There must be a better way.
   libraries:
-    - nkolban/ESP32 BLE Arduino@^1.0.1
+    - h2zero/NimBLE-Arduino
 
 esp32:
   board: esp32dev
@@ -16,31 +16,31 @@ esp32:
 light:
 - platform: custom
   lambda: |-
-    auto light_lab = new BLELights("LABROOM");
-    App.register_component(light_lab);
-    return {light_lab};
+    auto light_hallway = new BLELights("LABROOM");
+    App.register_component(light_hallway);
+    return {light_hallway};
   lights:
-    - name: "Lab Light"
-      id: light_lab
+    - name: "Hallway Light"
+      id: light_hallway
       default_transition_length: 0s
 - platform: custom
   lambda: |-
-    auto light_liv = new BLELights("LIVROOM");
-    App.register_component(light_liv);
-    return {light_liv};
+    auto light_entrance = new BLELights("LIVROOM");
+    App.register_component(light_entrance);
+    return {light_entrance};
   lights:
-    - name: "Living Room Light"
-      id: light_liv
+    - name: "Entrance Light"
+      id: light_entrance
       default_transition_length: 0s
-- platform: custom
-  lambda: |-
-    auto light_bed = new BLELights("BEDROOM");
-    App.register_component(light_bed);
-    return {light_bed};
-  lights:
-    - name: "Bedroom Light"
-      id: light_bed
-      default_transition_length: 0s
+#- platform: custom
+#  lambda: |-
+#    auto light_bed = new BLELights("BEDROOM");
+#    App.register_component(light_bed);
+#    return {light_bed};
+#  lights:
+#    - name: "Bedroom Light"
+#      id: light_bed
+#      default_transition_length: 0s
 
 
 
@@ -51,10 +51,10 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "REPLACE"
+    key: "KbcQQ9L72H0AljEXYnSRq+Ref6b/h76z8phv54/g6Ks="
 
 ota:
-  password: "REPLACE"
+  password: "fc26092f686b0280e0bb0e4998f8c293"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -63,7 +63,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Lights-Ceiling Fallback Hotspot"
-    password: "REPLACE"
+    password: "GENeQitVeqVD"
 
 captive_portal:
     
